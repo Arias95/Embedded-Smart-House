@@ -62,7 +62,7 @@ int photo_take(const struct _u_request *request, struct _u_response *response, v
     char *file_path = "/home/andres/Documents/Embebidos/Embedded-Smart-House/image.jpeg";
     const char *content_type;
     //char cwd[1024];
-    system("fswebcam image.jpeg");
+    system("fswebcam -r 640x480 -d /dev/video1 image.jpeg -S 2");
 
     if (response->shared_data != NULL)
     {
