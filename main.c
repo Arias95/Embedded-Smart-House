@@ -6,6 +6,7 @@
 #include <jansson.h>
 #include <errno.h>
 #include "include/photo.h"
+#include "include/lights.h"
 
 #define PORT 8000
 
@@ -20,6 +21,7 @@ int main(void)
     }
 
     ulfius_add_endpoint_by_val(&instance, "GET", "/foto", NULL, 0, &photo_take, NULL);
+    ulfius_add_endpoint_by_val(&instance, "POST", "/luces", NULL, 0, &lights_on, NULL);
 
     if (ulfius_start_framework(&instance) == U_OK)
     {

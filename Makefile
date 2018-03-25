@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -c
-LFLAGS = -Wall -v
+CFLAGS = -Wall -g -c
+LFLAGS = -Wall
 
-OBJS = main.o photo.o
-LIBS = -ljansson -lulfius
+OBJS = main.o photo.o lights.o
+LIBS = -ljansson -lorcania -lyder -lulfius
 
 server: $(OBJS)
 	mkdir -p bin
@@ -15,6 +15,9 @@ main.o: main.c
 
 photo.o: ./include/photo.h ./src/photo.c
 	$(CC) $(CFLAGS) ./src/photo.c
+
+lights.o: ./include/lights.h ./src/lights.c
+	$(CC) $(CFLAGS) ./src/lights.c
 	
 clean:
 	rm ./bin/server
