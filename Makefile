@@ -3,7 +3,7 @@ CFLAGS = -Wall -g -c
 LFLAGS = -Wall
 
 OBJS = main.o photo.o lights.o
-LIBS = -ljansson -lorcania -lyder -lulfius
+LIBS = -ljansson -lulfius
 
 server: $(OBJS)
 	mkdir -p bin

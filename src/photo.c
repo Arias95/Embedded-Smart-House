@@ -4,8 +4,6 @@
 #include <string.h>
 #include <ulfius.h>
 #include <jansson.h>
-#include <orcania.h>
-#include <yder.h>
 
 struct _static_file_config
 {
@@ -61,8 +59,7 @@ int photo_take(const struct _u_request *request, struct _u_response *response, v
     FILE *f;
     char *file_path = "/home/andres/Documents/Embebidos/Embedded-Smart-House/image.jpeg";
     const char *content_type;
-    //char cwd[1024];
-    system("fswebcam -r 640x480 -d /dev/video1 image.jpeg -S 2");
+    system("fswebcam -r 640x480 -d /dev/video0 image.jpeg -S 2");
 
     if (response->shared_data != NULL)
     {
@@ -84,19 +81,18 @@ int photo_take(const struct _u_request *request, struct _u_response *response, v
 
             if (ulfius_set_stream_response(response, 200, &callback_static_file_stream, &callback_static_file_stream_free, length, STATIC_FILE_CHUNK, f) != U_OK)
             {
-                y_log_message(Y_LOG_LEVEL_ERROR, "callback_static_file - Error ulfius_set_stream_response");
+                puts("callback_static_file - Error ulfius_set_stream_response");
             }
         }
         else
         {
             ulfius_set_string_body_response(response, 404, "File not found");
         }
-        //o_free(file_path);
         return U_CALLBACK_CONTINUE;
     }
     else
     {
-        y_log_message(Y_LOG_LEVEL_ERROR, "Static File Server - Error, user_data is NULL or inconsistent");
+        puts("Static File Server - Error, user_data is NULL or inconsistent");
         return U_CALLBACK_ERROR;
     }
 
