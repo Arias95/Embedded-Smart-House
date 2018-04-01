@@ -1,25 +1,99 @@
+#define STATIC_FILE_CHUNK 25
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <ulfius.h>
 #include <jansson.h>
 
-int photo_take(const struct _u_request *request, struct _u_response *response, void *user_data)
+struct _static_file_config
 {
-    system("fswebcam image.jpeg");
+    char *files_path;
+    char *url_prefix;
+    struct _u_map *mime_types;
+};
 
-    char cwd[1024];
-
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
+/**
+ * Return the filename extension
+ */
+const char *get_filename_ext(const char *path)
+{
+    const char *dot = strrchr(path, '.');
+    if (!dot || dot == path)
+        return "*";
+    if (strchr(dot, '?') != NULL)
     {
-        json_t *res = json_object();
-        json_object_set_new(res, "Salio", json_string("Guapo ;)"));
-        json_object_set_new(res, "Path", json_string(cwd));
-        ulfius_set_json_body_response(response, 200, res);
-        json_decref(res);
+        *strchr(dot, '?') = '\0';
+    }
+    return dot;
+}
+
+/**
+ * Streaming callback function to ease sending large files
+ */
+static ssize_t callback_static_file_stream(void *cls, uint64_t pos, char *buf, size_t max)
+{
+    if (cls != NULL)
+    {
+        return fread(buf, 1, max, (FILE *)cls);
     }
     else
     {
-        ulfius_set_string_body_response(response, 500, "Error sacando el path.");
+        return U_STREAM_END;
+    }
+}
+
+/**
+ * Cleanup FILE* structure when streaming is complete
+ */
+static void callback_static_file_stream_free(void *cls)
+{
+    if (cls != NULL)
+    {
+        fclose((FILE *)cls);
+    }
+}
+
+int photo_take(const struct _u_request *request, struct _u_response *response, void *user_data)
+{
+    size_t length;
+    FILE *f;
+    char *file_path = "/home/andres/Documents/Embebidos/Embedded-Smart-House/image.jpeg";
+    const char *content_type;
+    system("fswebcam -r 640x480 -d /dev/video0 image.jpeg -S 2");
+
+    if (response->shared_data != NULL)
+    {
+        return U_CALLBACK_CONTINUE;
+    }
+
+    puts(file_path);
+    if (access(file_path, F_OK) != -1)
+    {
+        f = fopen(file_path, "rb");
+        if (f)
+        {
+            fseek(f, 0, SEEK_END);
+            length = ftell(f);
+            fseek(f, 0, SEEK_SET);
+            content_type = "image/jpeg";
+            u_map_put(response->map_header, "Content-Type:", content_type);
+            u_map_put(response->map_header, "Cache-Control:", "public, max-age=31536000");
+
+            if (ulfius_set_stream_response(response, 200, &callback_static_file_stream, &callback_static_file_stream_free, length, STATIC_FILE_CHUNK, f) != U_OK)
+            {
+                puts("callback_static_file - Error ulfius_set_stream_response");
+            }
+        }
+        else
+        {
+            ulfius_set_string_body_response(response, 404, "File not found");
+        }
+        return U_CALLBACK_CONTINUE;
+    }
+    else
+    {
+        puts("Static File Server - Error, user_data is NULL or inconsistent");
+        return U_CALLBACK_ERROR;
     }
 
     return U_CALLBACK_CONTINUE;
