@@ -7,6 +7,7 @@
 #include <errno.h>
 #include "include/photo.h"
 #include "include/lights.h"
+#include "include/doors.h"
 
 #define PORT 8000
 
@@ -24,6 +25,7 @@ int main(void)
     ulfius_add_endpoint_by_val(&instance, "POST", "/lights/on", NULL, 0, &lights_on, NULL);
     ulfius_add_endpoint_by_val(&instance, "POST", "/lights/off", NULL, 0, &lights_off, NULL);
     ulfius_add_endpoint_by_val(&instance, "POST", "/lights/state", NULL, 0, &light_state, NULL);
+    ulfius_add_endpoint_by_val(&instance, "POST", "/doors/state", NULL, 0, &door_state, NULL);
 
 
     if (ulfius_start_framework(&instance) == U_OK)
