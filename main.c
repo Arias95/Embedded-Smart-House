@@ -20,8 +20,11 @@ int main(void)
         return (1);
     }
 
-    ulfius_add_endpoint_by_val(&instance, "GET", "/foto", NULL, 0, &photo_take, NULL);
-    ulfius_add_endpoint_by_val(&instance, "POST", "/luces", NULL, 0, &lights_on, NULL);
+    ulfius_add_endpoint_by_val(&instance, "GET", "/photo", NULL, 0, &photo_take, NULL);
+    ulfius_add_endpoint_by_val(&instance, "POST", "/lights/on", NULL, 0, &lights_on, NULL);
+    ulfius_add_endpoint_by_val(&instance, "POST", "/lights/off", NULL, 0, &lights_off, NULL);
+    ulfius_add_endpoint_by_val(&instance, "POST", "/lights/state", NULL, 0, &light_state, NULL);
+
 
     if (ulfius_start_framework(&instance) == U_OK)
     {
